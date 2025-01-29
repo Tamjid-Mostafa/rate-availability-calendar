@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 import { HeightCache } from '../types';
 
 
-export const useCalendarData = (room_calendar: any, itemCount: number) => {
+export const useCalendarData = (room_calendar: any) => {
   const [dynamicHeights, setDynamicHeights] = useState<Record<number, number>>({});
 
   const calculateDynamicHeight = useCallback(

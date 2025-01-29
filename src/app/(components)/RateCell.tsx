@@ -19,7 +19,7 @@ interface IProps {
   };
   inventory: IRoomInventory;
 }
-const StyledInputContainer = styled(Box)(({ theme }) => ({
+const StyledInputContainer = styled(Box)(() => ({
   position: "relative",
   display: "flex",
   alignItems: "center",

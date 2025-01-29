@@ -88,12 +88,11 @@ export default function RoomRateAvailabilityCalendar(props: IProps) {
         rowData: Array<IGridData>;
         inventoryData: Array<IRoomInventory>;
       };
-
+  
       const row = rowData[rowIndex];
       const inventory = inventoryData[columnIndex];
-
       const isInventoryRow = row.type === "inventory";
-
+  
       const baseStyle = useMemo(
         () => ({
           width: "100%",
@@ -118,7 +117,46 @@ export default function RoomRateAvailabilityCalendar(props: IProps) {
         }),
         [inventory.status, theme.palette]
       );
-
+  
+      const renderRateCell = useMemo(() => {
+        if (isInventoryRow) return null;
+  
+        const ratePlan = row.rate_plan!;
+        const rateCalendar = ratePlan.calendar[columnIndex];
+  
+        switch (row.row) {
+          case "rate":
+            return (
+              <RoomRateCell
+                room_category={props.room_category}
+                rate_plan={ratePlan}
+                room_rate={rateCalendar}
+                inventory={inventory}
+              />
+            );
+          case "min_length_of_stay":
+            return (
+              <RoomRateRestrictionsCell
+                type="min_length_of_stay"
+                room_category={props.room_category}
+                rate_plan={ratePlan}
+                room_rate={rateCalendar}
+                inventory={inventory}
+              />
+            );
+          default:
+            return (
+              <RoomRateRestrictionsCell
+                type="reservation_deadline"
+                room_category={props.room_category}
+                rate_plan={ratePlan}
+                room_rate={rateCalendar}
+                inventory={inventory}
+              />
+            );
+        }
+      }, [isInventoryRow, row.row, props.room_category, row.rate_plan, inventory]);
+  
       if (isInventoryRow) {
         switch (row.row) {
           case "status":
@@ -143,46 +181,9 @@ export default function RoomRateAvailabilityCalendar(props: IProps) {
               </Box>
             );
         }
-      } else {
-        const ratePlan = row.rate_plan!;
-        const rateCalendar = ratePlan.calendar[columnIndex];
-
-        const renderRateCell = useMemo(() => {
-          switch (row.row) {
-            case "rate":
-              return (
-                <RoomRateCell
-                  room_category={props.room_category}
-                  rate_plan={ratePlan}
-                  room_rate={rateCalendar}
-                  inventory={inventory}
-                />
-              );
-            case "min_length_of_stay":
-              return (
-                <RoomRateRestrictionsCell
-                  type="min_length_of_stay"
-                  room_category={props.room_category}
-                  rate_plan={ratePlan}
-                  room_rate={rateCalendar}
-                  inventory={inventory}
-                />
-              );
-            default:
-              return (
-                <RoomRateRestrictionsCell
-                  type="reservation_deadline"
-                  room_category={props.room_category}
-                  rate_plan={ratePlan}
-                  room_rate={rateCalendar}
-                  inventory={inventory}
-                />
-              );
-          }
-        }, [row.row, props.room_category, ratePlan, rateCalendar, inventory]);
-
-        return <Box style={style}>{renderRateCell}</Box>;
       }
+  
+      return <Box style={style}>{renderRateCell}</Box>;
     },
     areEqual
   );

@@ -21,7 +21,7 @@ interface IProps {
   inventory: IRoomInventory;
 }
 
-const StyledInputContainer = styled(Box)(({ theme }) => ({
+const StyledInputContainer = styled(Box)(() => ({
 }));
 
 const StyledInput = styled("input")<React.InputHTMLAttributes<HTMLInputElement>>(

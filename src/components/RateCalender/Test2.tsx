@@ -94,8 +94,6 @@ export default function RateCalender() {
   // Fetch room rate availability calendar data
   const {
     data: room_calendar,
-    isFetched,
-    isSuccess,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
@@ -128,7 +126,7 @@ export default function RateCalender() {
 
   const handleCalenderScroll = useCallback(
     ({ scrollLeft }: GridOnScrollProps) => {
-      inventoryRefs.current.forEach((ref, index) => {
+      inventoryRefs.current.forEach((ref) => {
         ref?.current?.scrollTo({ scrollLeft });
       });
 
@@ -155,7 +153,7 @@ export default function RateCalender() {
           animationFrame = requestAnimationFrame(() => {
             const scrollLeft =
               (mainGridContainerRef.current?.scrollLeft || 0) + e.deltaX;
-            inventoryRefs.current.forEach((ref, index) => {
+            inventoryRefs.current.forEach((ref) => {
               ref.current?.scrollTo({ scrollLeft });
             });
 

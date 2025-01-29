@@ -238,7 +238,7 @@ export default function RateCalender() {
     async (startIndex: number, stopIndex: number) => {
       if (!hasNextPage || isFetchingNextPage || pendingRequest) return;
 
-      console.log("Checking Index", { startIndex, stopIndex });
+      // console.log("Checking Index", { startIndex, stopIndex });
 
       // Calculate current loaded items
       const currentLoadedItems =

@@ -121,10 +121,6 @@ export default function RateCalender() {
       : watchedDateRange[0]!.add(2, "month")
     ).format("YYYY-MM-DD"),
   });
-console.log({isFetched,
-  isSuccess,
-  hasNextPage,
-  isFetchingNextPage,});
   // Refs for various elements to handle scrolling
   const rootContainerRef = useRef<HTMLDivElement>(null);
   const calenderMonthsRef = useRef<VariableSizeList | null>(null);

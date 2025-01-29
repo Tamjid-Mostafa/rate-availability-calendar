@@ -125,7 +125,7 @@ export default function RateCalender() {
       : watchedDateRange[0]!.add(2, "month")
     ).format("YYYY-MM-DD"),
   });
-  console.log("Room Calendar Pages:", room_calendar?.pages);
+  // console.log("Room Calendar Pages:", room_calendar?.pages);
 
   // Refs for various elements to handle scrolling
   const rootContainerRef = useRef<HTMLDivElement>(null);
@@ -238,7 +238,7 @@ export default function RateCalender() {
     async (startIndex: number, stopIndex: number) => {
       if (!hasNextPage || isFetchingNextPage || pendingRequest) return;
 
-      console.log("Checking Index", { startIndex, stopIndex });
+      // console.log("Checking Index", { startIndex, stopIndex });
 
       // Calculate current loaded items
       const currentLoadedItems =

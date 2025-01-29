@@ -45,17 +45,16 @@ export default function RateCalender() {
   const propertyId = 1;
 
   // Get store values
-  
+
   // Initialize refs
   const rootContainerRef = useRef<HTMLDivElement>(null);
   const calenderMonthsRef = useRef<VariableSizeList | null>(null);
   const calenderDatesRef = useRef<FixedSizeGrid | null>(null);
   const mainGridContainerRef = useRef<HTMLDivElement | null>(null);
   const inventoryRefs = useRef<Array<RefObject<VariableSizeGrid | null>>>([]);
-  
+
   const { calendarDates, calendarMonths } = useCalendarStore();
   const { control, watchedDateRange } = useCalendarSetup();
-
 
   // Your fetch logic using watchedDateRange
   const {
@@ -63,6 +62,7 @@ export default function RateCalender() {
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
+    isLoading,
   } = useRoomRateAvailabilityCalendar({
     property_id: propertyId,
     start_date: watchedDateRange[0]!.format("YYYY-MM-DD"),
@@ -70,7 +70,6 @@ export default function RateCalender() {
       ? watchedDateRange[1].format("YYYY-MM-DD")
       : watchedDateRange[0]!.add(2, "month").format("YYYY-MM-DD"),
   });
-
   // console.log("Room Calendar Pages:", room_calendar?.pages);
   // Calculate item count
   const itemCount = React.useMemo(() => {
@@ -83,13 +82,8 @@ export default function RateCalender() {
   }, [room_calendar?.pages, hasNextPage]);
 
   // Setup height management
-  const {
-    heightCacheRef,
-    listRef,
-    resizeTimeoutRef,
-    getRowHeight,
-    resetHeights,
-  } = useHeightManagement(room_calendar, itemCount);
+  const { listRef, resizeTimeoutRef, getRowHeight, resetHeights } =
+    useHeightManagement(room_calendar, itemCount);
 
   // Setup scroll synchronization
   const { handleScroll } = useScrollSync({
@@ -222,33 +216,49 @@ export default function RateCalender() {
             onScroll={handleScroll}
             dates={calendarDates}
           />
-          <Grid container sx={{ height: "100vh" }}>
-            <AutoSizer>
-              {({ height, width }) => (
-                <InfiniteLoader
-                  isItemLoaded={isItemLoaded}
-                  itemCount={itemCount}
-                  loadMoreItems={loadMore}
-                  threshold={1}
-                >
-                  {({ onItemsRendered, ref }) => (
-                    <StyledVariableSizeList
-                      ref={ref}
-                      height={height}
-                      width={width}
-                      itemCount={itemCount}
-                      itemSize={getRowHeight}
-                      onItemsRendered={onItemsRendered}
-                      style={{ scrollBehavior: "smooth" }}
-                      overscanCount={1}
-                    >
-                      {RowRenderer}
-                    </StyledVariableSizeList>
-                  )}
-                </InfiniteLoader>
-              )}
-            </AutoSizer>
-          </Grid>
+          {isLoading ? (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "200px",
+                backgroundColor: "background.paper",
+                borderBottom: 1,
+                borderColor: "divider",
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          ) : (
+            <Grid container sx={{ height: "100vh" }}>
+              <AutoSizer>
+                {({ height, width }) => (
+                  <InfiniteLoader
+                    isItemLoaded={isItemLoaded}
+                    itemCount={itemCount}
+                    loadMoreItems={loadMore}
+                    threshold={1}
+                  >
+                    {({ onItemsRendered, ref }) => (
+                      <StyledVariableSizeList
+                        ref={ref}
+                        height={height}
+                        width={width}
+                        itemCount={itemCount}
+                        itemSize={getRowHeight}
+                        onItemsRendered={onItemsRendered}
+                        style={{ scrollBehavior: "smooth" }}
+                        overscanCount={1}
+                      >
+                        {RowRenderer}
+                      </StyledVariableSizeList>
+                    )}
+                  </InfiniteLoader>
+                )}
+              </AutoSizer>
+            </Grid>
+          )}
         </Card>
       </Box>
       <Box

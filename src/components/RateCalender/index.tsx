@@ -108,7 +108,7 @@ export default function RateCalender() {
           animationFrame = requestAnimationFrame(() => {
             const scrollLeft =
               (mainGridContainerRef.current?.scrollLeft || 0) + e.deltaX;
-            inventoryRefs.current.forEach((ref, index) => {
+            inventoryRefs.current.forEach((ref) => {
               ref.current?.scrollTo({ scrollLeft });
             });
 

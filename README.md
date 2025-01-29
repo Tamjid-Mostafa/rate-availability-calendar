@@ -121,10 +121,22 @@ You can find a working Postman collection for this API [here](https://www.postma
 
 Good luck, and we look forward to reviewing your implementation!
 
-===
-## Developer Notes (Updates Made)
+---
+### **Summary**  
 
-1. **Infinite Scrolling**: Added infinite scrolling functionality using React Query's infinite queries with a cursor parameter.
-2. **Horizontal Scroll Optimization**: Replaced laggy Material-UI TextField with a custom input for better scroll performance.
-3. **Custom Hooks**: Introduced `useScrollSync` and `useInfiniteLoading` for enhanced functionality.
-4. **State Management**: Refactored state handling using Zustand for better performance and maintainability.
+- **Infinite Scrolling**: Implemented with React Query’s infinite queries using a cursor.  
+- **Scroll Optimization**: Replaced slow MUI TextField with a custom input for better performance.  
+- **Custom Hooks**: Added `useScrollSync` (syncs scrolling) and `useInfiniteLoading` (handles infinite scroll).  
+- **State Management**: Refactored with Zustand for better performance and maintainability.  
+
+### **Project Structure**  
+
+- **`components/RateCalendar`**: Contains modular components for the RateCalendar feature.  
+- **`hooks/`**: Centralized custom hooks for reuse (`useInfiniteLoading`, `useScrollSync`).  
+- **`store/`**: Manages global state with Zustand (`useCalendarStore` for calendar data).  
+
+### **Best Practices**  
+
+- **Modular**: Self-contained `RateCalendar` for easier maintenance.  
+- **Reusable**: Hooks can be used across different features.  
+- **Optimized**: Zustand ensures efficient state handling.

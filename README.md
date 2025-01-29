@@ -122,21 +122,28 @@ You can find a working Postman collection for this API [here](https://www.postma
 Good luck, and we look forward to reviewing your implementation!
 
 ---
-### **Summary**  
 
-- **Infinite Scrolling**: Implemented with React Query’s infinite queries using a cursor.  
-- **Scroll Optimization**: Replaced slow MUI TextField with a custom input for better performance.  
-- **Custom Hooks**: Added `useScrollSync` (syncs scrolling) and `useInfiniteLoading` (handles infinite scroll).  
-- **State Management**: Refactored with Zustand for better performance and maintainability.  
+## **Enhancements & Changes**  
 
-### **Project Structure**  
+### **1. Infinite Scrolling Implementation**  
+- Converted `useRoomRateAvailabilityCalendar` query to use **React Query's infinite queries** with a `cursor` parameter.  
+- The calendar now **loads additional data dynamically** as the user scrolls, improving usability.  
 
-- **`components/RateCalendar`**: Contains modular components for the RateCalendar feature.  
-- **`hooks/`**: Centralized custom hooks for reuse (`useInfiniteLoading`, `useScrollSync`).  
-- **`store/`**: Manages global state with Zustand (`useCalendarStore` for calendar data).  
+### **2. Horizontal Scroll Optimization**  
+- Replaced **Material-UI’s TextField** with a **custom input** to enhance scrolling performance.  
+- Ensured smooth and **responsive horizontal navigation** across different devices.  
 
-### **Best Practices**  
+### **3. Custom Hooks for Better Code Structure**  
+- Introduced reusable hooks for improved maintainability:  
+  - `useInfiniteLoading` – Handles **infinite scrolling logic**.  
+  - `useScrollSync` – Synchronizes **horizontal scrolling** across calendar sections.  
 
-- **Modular**: Self-contained `RateCalendar` for easier maintenance.  
-- **Reusable**: Hooks can be used across different features.  
-- **Optimized**: Zustand ensures efficient state handling.
+### **4. State Management Optimization**  
+- Refactored state handling using **Zustand**, replacing local component state for better performance.  
+- Ensured state remains **centralized and easy to manage**.  
+
+### **5. Updated Documentation**  
+- Added detailed explanations for **new hooks, state management, and optimizations**.  
+- Ensured future developers can easily understand and extend the functionality.  
+
+---

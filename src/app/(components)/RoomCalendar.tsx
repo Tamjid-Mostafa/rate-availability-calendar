@@ -55,8 +55,6 @@ export default function RoomRateAvailabilityCalendar(props: IProps) {
     };
   }, [InventoryRef, props.InventoryRefs, props.index]);
 
-
-
   // Memoize the grid data to avoid unnecessary re-renders
   const calendarGridData = useMemo(() => {
     const data: Array<IGridData> = [
@@ -88,11 +86,11 @@ export default function RoomRateAvailabilityCalendar(props: IProps) {
         rowData: Array<IGridData>;
         inventoryData: Array<IRoomInventory>;
       };
-  
+
       const row = rowData[rowIndex];
       const inventory = inventoryData[columnIndex];
       const isInventoryRow = row.type === "inventory";
-  
+
       const baseStyle = useMemo(
         () => ({
           width: "100%",
@@ -117,13 +115,13 @@ export default function RoomRateAvailabilityCalendar(props: IProps) {
         }),
         [inventory.status, theme.palette]
       );
-  
+
       const renderRateCell = useMemo(() => {
         if (isInventoryRow) return null;
-  
+
         const ratePlan = row.rate_plan!;
         const rateCalendar = ratePlan.calendar[columnIndex];
-  
+
         switch (row.row) {
           case "rate":
             return (
@@ -155,8 +153,14 @@ export default function RoomRateAvailabilityCalendar(props: IProps) {
               />
             );
         }
-      }, [isInventoryRow, row.row, props.room_category, row.rate_plan, inventory]);
-  
+      }, [
+        isInventoryRow,
+        row.row,
+        props.room_category,
+        row.rate_plan,
+        inventory,
+      ]);
+
       if (isInventoryRow) {
         switch (row.row) {
           case "status":
@@ -182,7 +186,7 @@ export default function RoomRateAvailabilityCalendar(props: IProps) {
             );
         }
       }
-  
+
       return <Box style={style}>{renderRateCell}</Box>;
     },
     areEqual
@@ -212,7 +216,7 @@ export default function RoomRateAvailabilityCalendar(props: IProps) {
 
   return (
     <React.Fragment key={props.index}>
-      <Grid container sx={{ py: 4, px: 4 }}>
+      <Grid container sx={{ py: { md: 4, xs: 1 }, px: { md: 4 } }}>
         <Grid size={10}>
           <Typography
             variant="h5"
@@ -236,8 +240,8 @@ export default function RoomRateAvailabilityCalendar(props: IProps) {
       >
         <Grid
           sx={{
-            pl: 4,
-            fontSize: "12px",
+            pl: { md: 4 },
+            fontSize: { md: "12px", xs: "10px" },
             fontWeight: 500,
           }}
           container
@@ -393,7 +397,7 @@ export default function RoomRateAvailabilityCalendar(props: IProps) {
                 itemData={{
                   rowData: calendarGridData,
                   inventoryData: props.room_category.inventory_calendar,
-                  room_category: props.room_category
+                  room_category: props.room_category,
                 }}
               >
                 {RateCalendarGrid}

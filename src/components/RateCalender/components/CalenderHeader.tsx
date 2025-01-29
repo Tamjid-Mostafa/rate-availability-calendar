@@ -26,7 +26,9 @@ export const CalendarHeader = ({ control }: CalendarHeaderProps) => (
         </Typography>
       </Grid>
 
-      <Grid size={4}>
+      <Grid
+        size={{ md: 4, xs: "auto" }}
+      >
         <Controller
           name="date_range"
           control={control}
@@ -42,6 +44,7 @@ export const CalendarHeader = ({ control }: CalendarHeaderProps) => (
               slots={{ field: SingleInputDateRangeField }}
               slotProps={{
                 textField: {
+                  size: "small",
                   fullWidth: true,
                   error: invalid,
                   helperText: invalid ? error?.message : null,

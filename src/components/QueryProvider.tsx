@@ -23,6 +23,11 @@ function QueryProvider({ children }: PropsWithChildren) {
           }
         },
       }),
+      defaultOptions: {
+        queries: {
+          refetchOnWindowFocus: false,
+        },
+      },
     })
   );
 

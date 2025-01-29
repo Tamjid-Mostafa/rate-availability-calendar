@@ -20,23 +20,41 @@ interface IProps {
   };
   inventory: IRoomInventory;
 }
-
-const StyledTextField = styled(TextField)(({ theme }) => ({
-  "& .MuiOutlinedInput-root": {
-    "& fieldset": {
-      borderWidth: 0,
-    },
-    "&:hover fieldset": {
-      borderWidth: 2,
-      borderColor: theme.palette.success.main,
-    },
-    "&.Mui-focused fieldset": {
-      borderWidth: 2,
-      borderColor: theme.palette.success.main,
-    },
-  },
+const StyledInputContainer = styled(Box)(({ theme }) => ({
+  position: "relative",
+  display: "flex",
+  alignItems: "center",
+  width: "100%",
 }));
 
+const StyledInput = styled("input")<
+  React.InputHTMLAttributes<HTMLInputElement>
+>(({ theme }) => ({
+  width: "100%",
+  padding: "4px",
+  textAlign: "right",
+  fontSize: "12px",
+  fontWeight: "bold",
+  backgroundColor: "inherit",
+  outline: "none",
+  border: "2px solid transparent",
+  transition: "border-color 0.3s ease", // Smooth transitions
+  "&:hover": {
+    borderColor: theme.palette.success.main,
+  },
+  "&:focus": {
+    borderColor: theme.palette.success.main,
+  },
+  "&.error": {
+    borderColor: theme.palette.error.main,
+  },
+}));
+const ErrorIcon = styled(InputAdornment)(({ theme }) => ({
+  position: "absolute",
+  right: "4px",
+  color: theme.palette.error.main,
+  fontSize: "14px",
+}));
 export default function RoomRateCell(props: IProps) {
   const theme = useTheme();
 
@@ -83,33 +101,18 @@ export default function RoomRateCell(props: IProps) {
           }}
           defaultValue={props.room_rate.rate}
           render={({ field, fieldState: { invalid } }) => (
-            <StyledTextField
-              {...field}
-              size="small"
-              variant="outlined"
-              id="rate"
-              type="text"
-              fullWidth
-              sx={{ marginBottom: 0 }}
-              inputProps={{
-                sx: {
-                  paddingX: "4px",
-                  paddingY: "4px",
-                  textAlign: "right",
-                  fontSize: "12px",
-                  fontWeight: "bold",
-                },
-              }}
-              error={invalid}
-              InputProps={{
-                endAdornment: invalid ? (
-                  <InputAdornment position="end" sx={{ margin: 0, padding: 0 }}>
-                    <ErrorOutline sx={{ fontSize: 12, color: "error.main" }} />
-                  </InputAdornment>
-                ) : null,
-                sx: { border: "0px", borderRadius: "0px" },
-              }}
-            />
+            <StyledInputContainer>
+              <StyledInput
+                {...field}
+                className={invalid ? "error" : ""}
+                type="text"
+              />
+              {invalid && (
+                <ErrorIcon position="end">
+                  <ErrorOutline />
+                </ErrorIcon>
+              )}
+            </StyledInputContainer>
           )}
         />
       </Box>

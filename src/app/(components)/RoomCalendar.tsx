@@ -9,7 +9,7 @@ import {
   GridChildComponentProps,
   GridOnScrollProps,
 } from "react-window";
-import { memo, RefObject, useMemo, useRef } from "react";
+import React, { memo, RefObject, useEffect, useMemo, useRef } from "react";
 import { styled } from "@mui/material/styles";
 import RoomRateCell from "./RateCell";
 import RoomRateRestrictionsCell from "./RestrictionsCell";
@@ -19,7 +19,11 @@ import {
   IRoomInventory,
 } from "../(hooks)/useRoomRateAvailabilityCalendar";
 import { Person } from "@mui/icons-material";
+import dynamic from "next/dynamic";
+// import RateCalendarGrid from "@/components/RateCalenderGrid/CalenderGrid";
 
+// const RoomRateCell = dynamic(()=> import("./RateCell"),{ssr: false})
+// const RoomRateRestrictionsCell = dynamic(()=> import("./RestrictionsCell"),{ssr: false})
 // Define the props for the RoomRateAvailabilityCalendar component
 interface IProps {
   InventoryRefs: RefObject<Array<RefObject<VariableSizeGrid | null>>>;
@@ -43,10 +47,17 @@ interface IGridData {
 // Component to render the room rate availability calendar
 export default function RoomRateAvailabilityCalendar(props: IProps) {
   const theme = useTheme(); // Get the theme for styling
-  const InventoryRef = useRef<VariableSizeGrid | null>(null);
+  const InventoryRef = useMemo(() => React.createRef<VariableSizeGrid>(), []);
 
-  // Store the ref in the InventoryRefs array
-  props.InventoryRefs.current[props.index] = InventoryRef;
+  // Dynamically add the current ref to the parent component's refs array
+  useEffect(() => {
+    props.InventoryRefs.current[props.index] = InventoryRef;
+    return () => {
+      props.InventoryRefs.current[props.index].current = null;
+    };
+  }, [InventoryRef, props.InventoryRefs, props.index]);
+
+
 
   // Memoize the grid data to avoid unnecessary re-renders
   const calendarGridData = useMemo(() => {
@@ -75,140 +86,117 @@ export default function RoomRateAvailabilityCalendar(props: IProps) {
   // Component to render each cell in the grid
   const RateCalendarGrid: React.FC<GridChildComponentProps> = memo(
     function RateCalendarGridFC({ columnIndex, rowIndex, style, data }) {
-      const {
-        rowData,
-        inventoryData,
-      }: { rowData: Array<IGridData>; inventoryData: Array<IRoomInventory> } =
-        data;
+      const { rowData, inventoryData } = data as {
+        rowData: Array<IGridData>;
+        inventoryData: Array<IRoomInventory>;
+      };
 
-      if (rowData[rowIndex].type === "inventory") {
-        const inventory = inventoryData[columnIndex];
+      const row = rowData[rowIndex];
+      const inventory = inventoryData[columnIndex];
 
-        if (rowData[rowIndex].row === "status") {
-          return (
-            <Box style={style}>
-              <RoomInventoryStatusCell
-                inventory={inventory}
-                room_category={{
-                  id: props.room_category.id,
-                  name: props.room_category.name,
-                }}
-              />
-            </Box>
-          );
-        } else if (rowData[rowIndex].row === "available") {
-          return (
-            <Box style={style}>
-              <Box
-                sx={{
-                  width: "100%",
-                  height: "100%",
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  alignItems: "center",
-                  pr: 1,
-                  fontSize: "12px",
-                  fontWeight: "bold",
-                  borderLeft: "1px solid",
-                  borderBottom: "1px solid",
-                  borderColor: inventory.status
-                    ? theme.palette.divider
-                    : theme.palette.error.dark,
-                  color: inventory.status
-                    ? "inherit"
-                    : theme.palette.background.default,
-                  backgroundColor: inventory.status
-                    ? "inherit"
-                    : theme.palette.error.light,
-                }}
-              >
-                {inventory.available}
+      const isInventoryRow = row.type === "inventory";
+
+      const baseStyle = useMemo(
+        () => ({
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          pr: 1,
+          fontSize: "12px",
+          fontWeight: "bold",
+          borderLeft: "1px solid",
+          borderBottom: "1px solid",
+          borderColor: inventory.status
+            ? theme.palette.divider
+            : theme.palette.error.dark,
+          color: inventory.status
+            ? "inherit"
+            : theme.palette.background.default,
+          backgroundColor: inventory.status
+            ? "inherit"
+            : theme.palette.error.light,
+        }),
+        [inventory.status, theme.palette]
+      );
+
+      if (isInventoryRow) {
+        switch (row.row) {
+          case "status":
+            return (
+              <Box style={style}>
+                <RoomInventoryStatusCell
+                  inventory={inventory}
+                  room_category={props.room_category}
+                />
               </Box>
-            </Box>
-          );
-        } else {
-          return (
-            <Box style={style}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  alignItems: "center",
-                  width: "100%",
-                  height: "100%",
-                  pr: 1,
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  borderLeft: "1px solid",
-                  borderBottom: "1px solid",
-                  borderColor: inventory.status
-                    ? theme.palette.divider
-                    : theme.palette.error.dark,
-                  color: inventory.status
-                    ? "inherit"
-                    : theme.palette.background.default,
-                  backgroundColor: inventory.status
-                    ? "inherit"
-                    : theme.palette.error.light,
-                }}
-              >
-                {inventory.booked}
+            );
+          case "available":
+            return (
+              <Box style={style}>
+                <Box sx={baseStyle}>{inventory.available}</Box>
               </Box>
-            </Box>
-          );
+            );
+          default:
+            return (
+              <Box style={style}>
+                <Box sx={baseStyle}>{inventory.booked}</Box>
+              </Box>
+            );
         }
       } else {
-        const rate_plan = {
-          id: rowData[rowIndex].rate_plan!.id,
-          name: rowData[rowIndex].rate_plan!.name,
-        };
-        const inventory = inventoryData[columnIndex];
-        const rate_calendar =
-          rowData[rowIndex].rate_plan!.calendar[columnIndex];
+        const ratePlan = row.rate_plan!;
+        const rateCalendar = ratePlan.calendar[columnIndex];
 
-        if (rowData[rowIndex].row === "rate") {
-          return (
-            <Box style={style}>
-              <RoomRateCell
-                room_category={{
-                  id: props.room_category.id,
-                  name: props.room_category.name,
-                }}
-                rate_plan={rate_plan}
-                room_rate={rate_calendar}
-                inventory={inventory}
-              />
-            </Box>
-          );
-        } else if (rowData[rowIndex].row === "min_length_of_stay") {
-          return (
-            <Box style={style}>
-              <RoomRateRestrictionsCell
-                type="min_length_of_stay"
-                room_category={props.room_category}
-                rate_plan={rate_plan}
-                room_rate={rate_calendar}
-                inventory={inventory}
-              />
-            </Box>
-          );
-        } else {
-          return (
-            <Box style={style}>
-              <RoomRateRestrictionsCell
-                type="reservation_deadline"
-                room_category={props.room_category}
-                rate_plan={rate_plan}
-                room_rate={rate_calendar}
-                inventory={inventory}
-              />
-            </Box>
-          );
-        }
+        const renderRateCell = useMemo(() => {
+          switch (row.row) {
+            case "rate":
+              return (
+                <RoomRateCell
+                  room_category={props.room_category}
+                  rate_plan={ratePlan}
+                  room_rate={rateCalendar}
+                  inventory={inventory}
+                />
+              );
+            case "min_length_of_stay":
+              return (
+                <RoomRateRestrictionsCell
+                  type="min_length_of_stay"
+                  room_category={props.room_category}
+                  rate_plan={ratePlan}
+                  room_rate={rateCalendar}
+                  inventory={inventory}
+                />
+              );
+            default:
+              return (
+                <RoomRateRestrictionsCell
+                  type="reservation_deadline"
+                  room_category={props.room_category}
+                  rate_plan={ratePlan}
+                  room_rate={rateCalendar}
+                  inventory={inventory}
+                />
+              );
+          }
+        }, [row.row, props.room_category, ratePlan, rateCalendar, inventory]);
+
+        return <Box style={style}>{renderRateCell}</Box>;
       }
     },
     areEqual
   );
+  // const RateCalendarGrid = React.memo(
+  //   ({ columnIndex, rowIndex, style }:any) => (
+  //     <div style={style}>
+  //       <div>Row{rowIndex}</div>
+  //       <div>Column{columnIndex}</div>
+  //     </div>
+  //   ),
+  //   areEqual
+  // );
 
   // Style the VariableSizeGrid to hide the scrollbar if it's not the last element
   const StyledVariableSizeGrid = styled(VariableSizeGrid)(
@@ -224,7 +212,7 @@ export default function RoomRateAvailabilityCalendar(props: IProps) {
   );
 
   return (
-    <>
+    <React.Fragment key={props.index}>
       <Grid container sx={{ py: 4, px: 4 }}>
         <Grid size={10}>
           <Typography
@@ -406,6 +394,7 @@ export default function RoomRateAvailabilityCalendar(props: IProps) {
                 itemData={{
                   rowData: calendarGridData,
                   inventoryData: props.room_category.inventory_calendar,
+                  room_category: props.room_category
                 }}
               >
                 {RateCalendarGrid}
@@ -414,6 +403,6 @@ export default function RoomRateAvailabilityCalendar(props: IProps) {
           </AutoSizer>
         </Grid>
       </Grid>
-    </>
+    </React.Fragment>
   );
 }

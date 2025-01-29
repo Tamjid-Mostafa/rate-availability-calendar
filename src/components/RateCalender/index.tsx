@@ -1,5 +1,6 @@
 "use client";
 
+// Import necessary modules and components
 import {
   Grid2 as Grid,
   Typography,
@@ -7,35 +8,61 @@ import {
   Box,
   Container,
   CircularProgress,
+  Button,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { useForm } from "react-hook-form";
-import React, { RefObject, memo, useEffect, useRef } from "react";
+import { DateRange } from "@mui/x-date-pickers-pro";
+import { DateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker";
+import { SingleInputDateRangeField } from "@mui/x-date-pickers-pro/SingleInputDateRangeField";
+import { Controller, useForm } from "react-hook-form";
+import React, {
+  RefObject,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   VariableSizeList,
   ListChildComponentProps,
   areEqual,
   FixedSizeGrid,
+  GridChildComponentProps,
   VariableSizeGrid,
+  GridOnScrollProps,
 } from "react-window";
 import { styled } from "@mui/material/styles";
+import dayjs from "dayjs";
+import { countDaysByMonth } from "@/utils";
+
+import Navbar from "@/components/Navbar";
+import RoomRateAvailabilityCalendar from "@/app/(components)/RoomCalendar";
+import useRoomRateAvailabilityCalendar, {
+  IRoomCategoryCalender,
+} from "@/app/(hooks)/useRoomRateAvailabilityCalendar";
+import MonthRow from "./components/MonthRow";
+import DateRow from "./components/DateRow";
 import AutoSizer from "react-virtualized-auto-sizer";
 import InfiniteLoader from "react-window-infinite-loader";
-import { findCategory } from "@/app/(components)/calculateRoomCategoryHeight";
-import { useCalendarStore } from "./store/useCalenderStore";
-import { useCalendarSetup } from "./hooks/useCalendarSetup";
-import useRoomRateAvailabilityCalendar from "@/app/(hooks)/useRoomRateAvailabilityCalendar";
-import { useHeightManagement } from "./hooks/useHeightManagement";
-import { useScrollSync } from "./hooks/useScrollSync";
-import { useInfiniteLoading } from "./hooks/useInfiniteLoading";
-import RoomRateAvailabilityCalendar from "@/app/(components)/RoomCalendar";
-import Navbar from "../Navbar";
+import {
+  HeightCache,
+  calculateRoomCategoryHeight,
+  calculateVirtualizedListHeight,
+  findCategory,
+} from "@/app/(components)/calculateRoomCategoryHeight";
 import { CalendarHeader } from "./components/CalenderHeader";
 import MonthContainer from "./components/MonthContainer";
 import DateContainer from "./components/DateContainer";
+// Define the form type for the date range picker
+export type CalendarForm = {
+  date_range: DateRange<dayjs.Dayjs>;
+};
 
+// Style the VariableSizeList to hide the scrollbar
 const StyledVariableSizeList = styled(VariableSizeList)({
   scrollbarWidth: "none",
+
   msOverflowStyle: "none",
   "&::-webkit-scrollbar": {
     display: "none",
@@ -43,68 +70,92 @@ const StyledVariableSizeList = styled(VariableSizeList)({
 });
 
 export default function RateCalender() {
-  const theme = useTheme();
-  const propertyId = 1;
+  const theme = useTheme(); // Get the theme for styling
 
-  // Get store values
-  const { calendarDates, calendarMonths } = useCalendarStore();
+  const propertyId = 1; // Example property ID
 
-  // Initialize refs
+  // State for calendar dates and months
+  const [calenderDates, setCalenderDates] = useState<Array<dayjs.Dayjs>>([]);
+  const [calenderMonths, setCalenderMonths] = useState<Array<[string, number]>>(
+    []
+  );
+  const [dynamicHeights, setDynamicHeights] = useState<Record<number, number>>(
+    {}
+  );
+
+  // Refs
+  const listRef = useRef<VariableSizeList>(null);
+  const heightCache = useRef<HeightCache>({});
+  const resizeTimeoutRef = useRef<NodeJS.Timeout>(null);
+
+  // Form control for date range picker
+  const { control, watch } = useForm<CalendarForm>({
+    defaultValues: {
+      date_range: [dayjs(), dayjs().add(4, "month")],
+    },
+  });
+  const watchedDateRange = watch("date_range");
+
+  // Update calendar dates and months when the date range changes
+  useEffect(() => {
+    const { months, dates } = countDaysByMonth(
+      watchedDateRange[0]!,
+      watchedDateRange[1]
+        ? watchedDateRange[1]
+        : watchedDateRange[0]!.add(2, "month")
+    );
+
+    setCalenderMonths(months);
+    setCalenderDates(dates);
+  }, [watchedDateRange]);
+
+  // Fetch room rate availability calendar data
+  const {
+    data: room_calendar,
+    isFetched,
+    isSuccess,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useRoomRateAvailabilityCalendar({
+    property_id: propertyId,
+    start_date: watchedDateRange[0]!.format("YYYY-MM-DD"),
+    end_date: (watchedDateRange[1]
+      ? watchedDateRange[1]
+      : watchedDateRange[0]!.add(2, "month")
+    ).format("YYYY-MM-DD"),
+  });
+  console.log("Room Calendar Pages:", room_calendar?.pages);
+
+  // Refs for various elements to handle scrolling
   const rootContainerRef = useRef<HTMLDivElement>(null);
   const calenderMonthsRef = useRef<VariableSizeList | null>(null);
   const calenderDatesRef = useRef<FixedSizeGrid | null>(null);
   const mainGridContainerRef = useRef<HTMLDivElement | null>(null);
   const inventoryRefs = useRef<Array<RefObject<VariableSizeGrid | null>>>([]);
 
-  // Setup calendar
-  const { dateRange } = useCalendarSetup();
-
-  // Initialize form
-  const { control } = useForm({
-    defaultValues: {
-      date_range: dateRange,
+  const handleDatesScroll = useCallback(
+    ({ scrollLeft }: GridOnScrollProps) => {
+      inventoryRefs.current.forEach((ref) => {
+        ref.current?.scrollTo({ scrollLeft });
+      });
+      calenderMonthsRef.current?.scrollTo(scrollLeft);
     },
-  });
+    [room_calendar]
+  );
 
-  // Fetch calendar data
-  const {
-    data: room_calendar,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-  } = useRoomRateAvailabilityCalendar({
-    property_id: propertyId,
-    start_date: dateRange[0]!.format("YYYY-MM-DD"),
-    end_date: (dateRange[1]
-      ? dateRange[1]
-      : dateRange[0]!.add(2, "month")
-    ).format("YYYY-MM-DD"),
-  });
-  // Calculate item count
-  const itemCount = React.useMemo(() => {
-    if (!room_calendar?.pages) return 0;
-    const loadedCount = room_calendar.pages.reduce(
-      (count, page) => count + page.data.room_categories.length,
-      0
-    );
-    return hasNextPage ? loadedCount + 1 : loadedCount;
-  }, [room_calendar?.pages, hasNextPage]);
+  const handleCalenderScroll = useCallback(
+    ({ scrollLeft }: GridOnScrollProps) => {
+      inventoryRefs.current.forEach((ref, index) => {
+        ref?.current?.scrollTo({ scrollLeft });
+      });
 
-  // Setup height management
-  const {
-    heightCacheRef,
-    listRef,
-    resizeTimeoutRef,
-    getRowHeight,
-    resetHeights,
-  } = useHeightManagement(room_calendar, itemCount);
+      calenderMonthsRef.current?.scrollTo(scrollLeft);
+      calenderDatesRef.current?.scrollTo({ scrollLeft });
+    },
+    [room_calendar]
+  );
 
-  // Setup scroll synchronization
-  const { handleScroll } = useScrollSync({
-    inventoryRefs,
-    calenderMonthsRef,
-    calenderDatesRef,
-  });
   useEffect(() => {
     const { current: rootContainer } = rootContainerRef;
 
@@ -147,14 +198,116 @@ export default function RateCalender() {
       };
     }
   }, [room_calendar]);
-  // Setup infinite loading
-  const { isItemLoaded, loadMore } = useInfiniteLoading({
-    room_calendar,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-    listRef,
-  });
+
+  // Memoized item count calculation
+
+  const itemCount = React.useMemo(() => {
+    if (!room_calendar?.pages) return 0;
+    // Calculate exact count of loaded items
+    const loadedCount = room_calendar.pages.reduce(
+      (count, page) => count + page.data.room_categories.length,
+      0
+    );
+    // Only add 1 to represent the next possible item if there's a next page
+    return hasNextPage ? loadedCount + 1 : loadedCount;
+  }, [room_calendar?.pages, hasNextPage]);
+
+  // Improved isItemLoaded check
+  const isItemLoaded = useCallback(
+    (index: number): boolean => {
+      if (!room_calendar?.pages) return false;
+
+      let countSoFar = 0;
+      for (const page of room_calendar.pages) {
+        const pageItemCount = page.data.room_categories.length;
+        if (index < countSoFar + pageItemCount) {
+          // console.log(index,"page item count",countSoFar + pageItemCount);
+          return true;
+        }
+        countSoFar += pageItemCount;
+      }
+      return false;
+    },
+    [room_calendar?.pages]
+  );
+
+  // Enhanced loadMore function with better loading logic
+  const [pendingRequest, setPendingRequest] = useState(false);
+
+  const loadMore = useCallback(
+    async (startIndex: number, stopIndex: number) => {
+      if (!hasNextPage || isFetchingNextPage || pendingRequest) return;
+
+      console.log("Checking Index", { startIndex, stopIndex });
+
+      // Calculate current loaded items
+      const currentLoadedItems =
+        room_calendar?.pages.reduce(
+          (count, page) => count + page.data.room_categories.length,
+          0
+        ) || 0;
+
+      // Fetch only when reaching the last few items
+      if (stopIndex >= currentLoadedItems - 3) {
+        setPendingRequest(true);
+        try {
+          await fetchNextPage();
+          listRef.current?.resetAfterIndex(currentLoadedItems);
+        } catch (error) {
+          console.error("Error loading more items:", error);
+        } finally {
+          setPendingRequest(false);
+        }
+      }
+    },
+    [
+      fetchNextPage,
+      hasNextPage,
+      isFetchingNextPage,
+      room_calendar?.pages,
+      pendingRequest,
+    ]
+  );
+
+  const getRowHeight = useCallback(
+    (index: number): number => {
+      // Return cached height if available
+      if (heightCache.current[index] !== undefined) {
+        return heightCache.current[index];
+      }
+
+      const category = findCategory(index, room_calendar?.pages);
+      const isLastElement = index === itemCount - 1;
+
+      const height = calculateVirtualizedListHeight(category, isLastElement);
+      heightCache.current[index] = height;
+
+      return height;
+    },
+    [room_calendar?.pages, itemCount]
+  );
+  // Calculate dynamic heights based on content
+  const calculateDynamicHeight = useCallback(
+    (index: number): number => {
+      if (dynamicHeights[index]) return dynamicHeights[index];
+
+      const category = findCategory(index, room_calendar?.pages);
+      if (!category) return 200; // Default height
+
+      const baseHeight = 150; // Base height for category
+      const contentHeight = calculateRoomCategoryHeight(
+        category.rate_plans.length
+      );
+      const newHeight = baseHeight + contentHeight;
+
+      // Update height cache
+      heightCache.current[index] = newHeight;
+      setDynamicHeights((prev) => ({ ...prev, [index]: newHeight }));
+
+      return newHeight;
+    },
+    [room_calendar?.pages, dynamicHeights]
+  );
 
   // Handle window resize
   useEffect(() => {
@@ -164,20 +317,17 @@ export default function RateCalender() {
       }
 
       resizeTimeoutRef.current = setTimeout(() => {
-        resetHeights();
+        heightCache.current = {};
+        setDynamicHeights({});
+        listRef.current?.resetAfterIndex(0);
       }, 150);
     };
 
     window.addEventListener("resize", handleResize);
-    return () => {
-      if (resizeTimeoutRef.current) {
-        clearTimeout(resizeTimeoutRef.current);
-      }
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [resetHeights, resizeTimeoutRef]);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-  // Row renderer component
+  // Row renderer with dynamic height calculation
   const RowRenderer = memo(({ index, style }: ListChildComponentProps) => {
     const isLoading = !isItemLoaded(index);
     const category = findCategory(index, room_calendar?.pages);
@@ -204,13 +354,23 @@ export default function RateCalender() {
     if (!category) return null;
 
     return (
-      <Box style={style}>
+      <Box
+        style={style}
+        onLoad={() => {
+          // Recalculate height after content loads
+          const newHeight = calculateDynamicHeight(index);
+          if (newHeight !== heightCache.current[index]) {
+            heightCache.current[index] = newHeight;
+            listRef.current?.resetAfterIndex(index);
+          }
+        }}
+      >
         <RoomRateAvailabilityCalendar
           key={`${category.id}-${index}`}
           index={index}
           InventoryRefs={inventoryRefs}
           room_category={category}
-          handleCalenderScroll={handleScroll}
+          handleCalenderScroll={handleCalenderScroll}
           isLastElement={index === itemCount - 1}
         />
       </Box>
@@ -223,13 +383,14 @@ export default function RateCalender() {
       <Box>
         <CalendarHeader control={control} />
         <Card elevation={1} sx={{ my: 6, padding: 3 }} ref={rootContainerRef}>
-          <MonthContainer ref={calenderMonthsRef} months={calendarMonths} />
+          <MonthContainer ref={calenderMonthsRef} months={calenderMonths} />
           <DateContainer
             ref={calenderDatesRef}
             outerRef={mainGridContainerRef}
-            onScroll={handleScroll}
-            dates={calendarDates}
+            onScroll={handleDatesScroll}
+            dates={calenderDates}
           />
+          {/* Infinite Scrolling Room Categories */}
           <Grid container sx={{ height: "100vh" }}>
             <AutoSizer>
               {({ height, width }) => (
@@ -240,7 +401,7 @@ export default function RateCalender() {
                   threshold={1}
                 >
                   {({ onItemsRendered, ref }) => (
-                    <StyledVariableSizeList
+                    <VariableSizeList
                       ref={ref}
                       height={height}
                       width={width}
@@ -251,7 +412,7 @@ export default function RateCalender() {
                       overscanCount={1}
                     >
                       {RowRenderer}
-                    </StyledVariableSizeList>
+                    </VariableSizeList>
                   )}
                 </InfiniteLoader>
               )}

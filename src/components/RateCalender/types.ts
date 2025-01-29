@@ -1,11 +1,11 @@
 // types/calendar.ts
 import { DateRange } from "@mui/x-date-pickers-pro";
-import { Dayjs } from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { RefObject } from "react";
 import { VariableSizeGrid, VariableSizeList } from "react-window";
 
 export interface CalendarForm {
-  date_range: DateRange<Dayjs>;
+  date_range: DateRange<dayjs.Dayjs>;
 }
 
 export interface RoomCategory {

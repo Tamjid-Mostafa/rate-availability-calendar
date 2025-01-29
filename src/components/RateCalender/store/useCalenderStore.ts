@@ -1,8 +1,7 @@
 // store/useCalendarStore.ts
-import { create } from 'zustand';
-import dayjs from 'dayjs';
 import { DateRange } from '@mui/x-date-pickers-pro';
-import { IRoomCategoryCalender } from '@/app/(hooks)/useRoomRateAvailabilityCalendar';
+import dayjs from 'dayjs';
+import { create } from 'zustand';
 
 interface CalendarState {
   dateRange: DateRange<dayjs.Dayjs>;

@@ -1,7 +1,7 @@
-import { styled } from "@mui/material/styles";
-import { Box, InputAdornment } from "@mui/material";
-import { Controller, useForm } from "react-hook-form";
 import { ErrorOutline } from "@mui/icons-material";
+import { Box, InputAdornment } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { Controller, useForm } from "react-hook-form";
 import {
   IRateCalendar,
   IRoomInventory,
@@ -22,10 +22,6 @@ interface IProps {
 }
 
 const StyledInputContainer = styled(Box)(({ theme }) => ({
-  position: "relative",
-  display: "flex",
-  alignItems: "center",
-  width: "100%",
 }));
 
 const StyledInput = styled("input")<React.InputHTMLAttributes<HTMLInputElement>>(

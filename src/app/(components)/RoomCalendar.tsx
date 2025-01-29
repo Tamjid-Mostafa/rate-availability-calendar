@@ -1,25 +1,23 @@
 // Import necessary modules and components
+import { Person } from "@mui/icons-material";
 import { Box, Grid2 as Grid, Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import RoomInventoryStatusCell from "./StatusCell";
+import { styled, useTheme } from "@mui/material/styles";
+import React, { RefObject, memo, useEffect, useMemo } from "react";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {
-  VariableSizeGrid,
-  areEqual,
   GridChildComponentProps,
   GridOnScrollProps,
+  VariableSizeGrid,
+  areEqual,
 } from "react-window";
-import React, { memo, RefObject, useEffect, useMemo, useRef } from "react";
-import { styled } from "@mui/material/styles";
-import RoomRateCell from "./RateCell";
-import RoomRateRestrictionsCell from "./RestrictionsCell";
 import {
   IRateCalendar,
   IRoomCategoryCalender,
   IRoomInventory,
 } from "../(hooks)/useRoomRateAvailabilityCalendar";
-import { Person } from "@mui/icons-material";
-import dynamic from "next/dynamic";
+import RoomRateCell from "./RateCell";
+import RoomRateRestrictionsCell from "./RestrictionsCell";
+import RoomInventoryStatusCell from "./StatusCell";
 // import RateCalendarGrid from "@/components/RateCalenderGrid/CalenderGrid";
 
 // const RoomRateCell = dynamic(()=> import("./RateCell"),{ssr: false})

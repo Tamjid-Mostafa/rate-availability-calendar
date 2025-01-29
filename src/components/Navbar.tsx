@@ -1,8 +1,8 @@
-import React from "react";
 import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
 import Button from "@mui/material/Button";
+import Toolbar from "@mui/material/Toolbar";
 import Image from "next/image";
+import React from "react";
 import Logo from "../../public/grit_logo-black.svg";
 
 const Navbar: React.FC = () => {

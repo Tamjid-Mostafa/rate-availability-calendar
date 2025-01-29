@@ -1,47 +1,42 @@
 "use client";
 
 // Import necessary modules and components
+import { countDaysByMonth } from "@/utils";
 import {
+  Box,
+  Button,
+  Card,
+  CircularProgress,
+  Container,
   Grid2 as Grid,
   Typography,
-  Card,
-  Box,
-  Container,
-  CircularProgress,
-  Button,
 } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
+import { styled, useTheme } from "@mui/material/styles";
 import { DateRange } from "@mui/x-date-pickers-pro";
 import { DateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker";
 import { SingleInputDateRangeField } from "@mui/x-date-pickers-pro/SingleInputDateRangeField";
-import { Controller, useForm } from "react-hook-form";
-import React, {
+import dayjs from "dayjs";
+import {
   RefObject,
-  memo,
   useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
+import { Controller, useForm } from "react-hook-form";
 import {
-  VariableSizeList,
-  ListChildComponentProps,
-  areEqual,
   FixedSizeGrid,
-  GridChildComponentProps,
-  VariableSizeGrid,
   GridOnScrollProps,
+  VariableSizeGrid,
+  VariableSizeList,
 } from "react-window";
-import { styled } from "@mui/material/styles";
-import dayjs from "dayjs";
-import { countDaysByMonth } from "@/utils";
 
-import Navbar from "@/components/Navbar";
 import RoomRateAvailabilityCalendar from "@/app/(components)/RoomCalendar";
 import useRoomRateAvailabilityCalendar from "@/app/(hooks)/useRoomRateAvailabilityCalendar";
-import MonthRow from "./components/MonthRow";
-import DateRow from "./components/DateRow";
+import Navbar from "@/components/Navbar";
 import AutoSizer from "react-virtualized-auto-sizer";
+import DateRow from "./components/DateRow";
+import MonthRow from "./components/MonthRow";
 
 // Define the form type for the date range picker
 export type CalendarForm = {
@@ -57,22 +52,7 @@ const StyledVariableSizeList = styled(VariableSizeList)({
     display: "none",
   },
 });
-const LOADING = 1;
-const LOADED = 2;
-let itemStatusMap = {} as any;
-const loadMoreItems = ({ startIndex, stopIndex }: any) => {
-  for (let index = startIndex; index <= stopIndex; index++) {
-    itemStatusMap[index] = LOADING;
-  }
-  return new Promise<void>((resolve) =>
-    setTimeout(() => {
-      for (let index = startIndex; index <= stopIndex; index++) {
-        itemStatusMap[index] = LOADED;
-      }
-      resolve();
-    }, 10)
-  );
-};
+
 export default function RateCalender() {
   const theme = useTheme(); // Get the theme for styling
 
@@ -193,7 +173,7 @@ export default function RateCalender() {
         rootContainer.removeEventListener("wheel", handler);
       };
     }
-  }, [room_calendar]);
+  }, []);
 
   return (
     <Container sx={{ backgroundColor: "#EEF2F6", scrollBehavior: "smooth" }}>

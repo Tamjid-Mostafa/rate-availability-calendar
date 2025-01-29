@@ -1,13 +1,13 @@
 "use client";
 
-import { PropsWithChildren, useState } from "react";
 import {
-  QueryClientProvider,
-  QueryClient,
   QueryCache,
+  QueryClient,
+  QueryClientProvider,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { enqueueSnackbar } from "notistack";
+import { PropsWithChildren, useState } from "react";
 
 function QueryProvider({ children }: PropsWithChildren) {
   const [client] = useState(

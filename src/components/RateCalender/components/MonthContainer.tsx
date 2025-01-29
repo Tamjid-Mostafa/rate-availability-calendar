@@ -1,13 +1,12 @@
 // components/MonthRow.tsx
-import React, { RefObject, memo } from "react";
-import {
-  ListChildComponentProps,
-  VariableSizeList,
-  areEqual,
-} from "react-window";
 import { Grid2 as Grid } from "@mui/material";
-import AutoSizer from "react-virtualized-auto-sizer";
 import { styled } from "@mui/material/styles";
+import React, { RefObject, memo } from "react";
+import AutoSizer from "react-virtualized-auto-sizer";
+import {
+  VariableSizeList,
+  areEqual
+} from "react-window";
 import MonthRow from "./MonthRow";
 
 // Style the VariableSizeList to hide the scrollbar

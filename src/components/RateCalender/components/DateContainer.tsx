@@ -1,28 +1,15 @@
 // components/DateRow.tsx
-import React, { RefObject, memo } from "react";
-import {
-  FixedSizeGrid,
-  GridOnScrollProps,
-  ListChildComponentProps,
-  VariableSizeList,
-  areEqual,
-} from "react-window";
 import { Grid2 as Grid } from "@mui/material";
-import AutoSizer from "react-virtualized-auto-sizer";
-import { styled } from "@mui/material/styles";
-import DateRow from "./DateRow";
-import dayjs from "dayjs";
 import { useTheme } from "@mui/material/styles";
-
-// Style the VariableSizeList to hide the scrollbar
-const StyledVariableSizeList = styled(VariableSizeList)({
-  scrollbarWidth: "none",
-
-  msOverflowStyle: "none",
-  "&::-webkit-scrollbar": {
-    display: "none",
-  },
-});
+import dayjs from "dayjs";
+import React, { RefObject, memo } from "react";
+import AutoSizer from "react-virtualized-auto-sizer";
+import {
+    FixedSizeGrid,
+    GridOnScrollProps,
+    areEqual
+} from "react-window";
+import DateRow from "./DateRow";
 
 interface DateContainerProps {
   dates: Array<dayjs.Dayjs>;

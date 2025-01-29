@@ -1,9 +1,9 @@
 "use client";
 
+import { Close as CloseIcon } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
 import { SnackbarProvider, closeSnackbar } from "notistack";
 import { PropsWithChildren } from "react";
-import { Close as CloseIcon } from "@mui/icons-material";
 
 function NotistackProvider({ children }: PropsWithChildren) {
   return (

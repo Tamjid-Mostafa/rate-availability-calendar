@@ -1,20 +1,18 @@
 "use client";
 
 // Import necessary modules and components
+import { countDaysByMonth } from "@/utils";
 import {
-  Grid2 as Grid,
-  Typography,
-  Card,
   Box,
-  Container,
+  Card,
   CircularProgress,
-  Button,
+  Container,
+  Grid2 as Grid,
+  Typography
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { DateRange } from "@mui/x-date-pickers-pro";
-import { DateRangePicker } from "@mui/x-date-pickers-pro/DateRangePicker";
-import { SingleInputDateRangeField } from "@mui/x-date-pickers-pro/SingleInputDateRangeField";
-import { Controller, useForm } from "react-hook-form";
+import dayjs from "dayjs";
 import React, {
   RefObject,
   memo,
@@ -23,51 +21,34 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useForm } from "react-hook-form";
 import {
-  VariableSizeList,
-  ListChildComponentProps,
-  areEqual,
   FixedSizeGrid,
-  GridChildComponentProps,
-  VariableSizeGrid,
   GridOnScrollProps,
+  ListChildComponentProps,
+  VariableSizeGrid,
+  VariableSizeList,
+  areEqual
 } from "react-window";
-import { styled } from "@mui/material/styles";
-import dayjs from "dayjs";
-import { countDaysByMonth } from "@/utils";
 
-import Navbar from "@/components/Navbar";
 import RoomRateAvailabilityCalendar from "@/app/(components)/RoomCalendar";
-import useRoomRateAvailabilityCalendar, {
-  IRoomCategoryCalender,
-} from "@/app/(hooks)/useRoomRateAvailabilityCalendar";
-import MonthRow from "./components/MonthRow";
-import DateRow from "./components/DateRow";
-import AutoSizer from "react-virtualized-auto-sizer";
-import InfiniteLoader from "react-window-infinite-loader";
 import {
   HeightCache,
   calculateRoomCategoryHeight,
   calculateVirtualizedListHeight,
   findCategory,
 } from "@/app/(components)/calculateRoomCategoryHeight";
+import useRoomRateAvailabilityCalendar from "@/app/(hooks)/useRoomRateAvailabilityCalendar";
+import Navbar from "@/components/Navbar";
+import AutoSizer from "react-virtualized-auto-sizer";
+import InfiniteLoader from "react-window-infinite-loader";
 import { CalendarHeader } from "./components/CalenderHeader";
-import MonthContainer from "./components/MonthContainer";
 import DateContainer from "./components/DateContainer";
+import MonthContainer from "./components/MonthContainer";
 // Define the form type for the date range picker
 export type CalendarForm = {
   date_range: DateRange<dayjs.Dayjs>;
 };
-
-// Style the VariableSizeList to hide the scrollbar
-const StyledVariableSizeList = styled(VariableSizeList)({
-  scrollbarWidth: "none",
-
-  msOverflowStyle: "none",
-  "&::-webkit-scrollbar": {
-    display: "none",
-  },
-});
 
 export default function RateCalender() {
   const theme = useTheme(); // Get the theme for styling
@@ -112,8 +93,6 @@ export default function RateCalender() {
   // Fetch room rate availability calendar data
   const {
     data: room_calendar,
-    isFetched,
-    isSuccess,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
@@ -197,7 +176,7 @@ export default function RateCalender() {
         rootContainer.removeEventListener("wheel", handler);
       };
     }
-  }, [room_calendar]);
+  }, []);
 
   // Memoized item count calculation
 

@@ -1,6 +1,7 @@
 // types/calendar.ts
+import { IRatePlanCalendar } from "@/app/(hooks)/useRoomRateAvailabilityCalendar";
 import { DateRange } from "@mui/x-date-pickers-pro";
-import dayjs, { Dayjs } from "dayjs";
+import dayjs from "dayjs";
 import { RefObject } from "react";
 import { VariableSizeGrid, VariableSizeList } from "react-window";
 
@@ -10,7 +11,7 @@ export interface CalendarForm {
 
 export interface RoomCategory {
   id: string;
-  rate_plans: any[]; // Define proper type based on your data structure
+  rate_plans: Array<IRatePlanCalendar>; // Define proper type based on your data structure
 }
 
 export interface HeightCache {

@@ -1,5 +1,5 @@
 // hooks/useScrollSync.ts
-import { useCallback, RefObject } from 'react';
+import { RefObject, useCallback } from 'react';
 import { FixedSizeGrid, GridOnScrollProps, VariableSizeGrid, VariableSizeList } from 'react-window';
 
 interface ScrollRefs {

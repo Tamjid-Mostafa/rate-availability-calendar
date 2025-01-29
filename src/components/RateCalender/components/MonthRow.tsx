@@ -1,7 +1,7 @@
-import React, { memo } from "react";
-import { ListChildComponentProps, areEqual } from "react-window";
 import { Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import React, { memo } from "react";
+import { ListChildComponentProps, areEqual } from "react-window";
 
 interface MonthRowProps extends ListChildComponentProps {
   months: Array<[string, number]>;
